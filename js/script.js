@@ -1,52 +1,117 @@
-const preguntas = [
-  { pregunta: "Cual es la capital de Francia?", opciones: ["Madrid", "Paris", "Roma", "Berlin"], respuestaCorrecta: 1, premio: 100 },
-  { pregunta: "Cuanto es 5 x 6?", opciones: ["30", "20", "56", "15"], respuestaCorrecta: 0, premio: 200 },
-  { pregunta: "Quien escribio 'Cien anos de soledad'?", opciones: ["Mario Vargas Llosa", "Gabriel Garcia Marquez", "Julio Cortazar", "Pablo Neruda"], respuestaCorrecta: 1, premio: 500 },
-  { pregunta: "Que planeta es el mas cercano al sol?", opciones: ["Venus", "Marte", "Mercurio", "Jupiter"], respuestaCorrecta: 2, premio: 1000 },
-  { pregunta: "Que idioma se habla en Brasil?", opciones: ["Espanol", "Portugues", "Ingles", "Frances"], respuestaCorrecta: 1, premio: 2000 },
-  { pregunta: "Cual es el oceano mas grande del mundo?", opciones: ["Atlantico", "Indico", "Artico", "Pacifico"], respuestaCorrecta: 3, premio: 3000 },
-  { pregunta: "En que ano llego el hombre a la luna?", opciones: ["1965", "1969", "1971", "1959"], respuestaCorrecta: 1, premio: 5000 },
-  { pregunta: "Quien pinto la Mona Lisa?", opciones: ["Miguel Angel", "Donatello", "Leonardo da Vinci", "Rafael"], respuestaCorrecta: 2, premio: 10000 },
-  { pregunta: "Que instrumento mide los sismos?", opciones: ["Altimetro", "Sismografo", "Barometro", "Georadar"], respuestaCorrecta: 1, premio: 20000 },
-  { pregunta: "Cual de estos paises no tiene salida al mar?", opciones: ["Paraguay", "Peru", "Ecuador", "Colombia"], respuestaCorrecta: 0, premio: 50000 },
-  { pregunta: "Que lengua antigua se hablaba en el Imperio Romano?", opciones: ["Griego", "Arabe", "Latin", "Arameo"], respuestaCorrecta: 2, premio: 100000 },
-  { pregunta: "Cual es el hueso mas largo del cuerpo humano?", opciones: ["Femur", "Tibia", "Humero", "Perone"], respuestaCorrecta: 0, premio: 150000 },
-  { pregunta: "Que gas constituye la mayor parte de la atmosfera terrestre?", opciones: ["Oxigeno", "Hidrogeno", "Nitrogeno", "Dioxido de carbono"], respuestaCorrecta: 2, premio: 300000 },
-  { pregunta: "Como se llama la parte derecha de un barco?", opciones: ["Proa", "Popa", "Babor", "Estribor"], respuestaCorrecta: 3, premio: 500000 },
-  { pregunta: "Cuales eran los nombres de los 3 mosqueteros en la novela de Alejandro Dumas?", opciones: ["Athos, Porthos y Aramis", "Napoleon, Robespierre y Danton", "Leon, Michel y Jacques", "Richelieu, Dartagnan y Dumas"], respuestaCorrecta: 0, premio: 1000000 }
-];
-
+let preguntas = [];
 let indice = 0;
 let premioActual = 0;
 let nombreJugador = "";
+let estadoJuego = "inicio"; // puede ser: inicio, enJuego, terminado
 
-const inicio = document.getElementById("inicio");
-const juego = document.getElementById("juego");
-const resultado = document.getElementById("resultado");
-const preguntaTexto = document.getElementById("preguntaTexto");
-const opcionesContainer = document.getElementById("opciones");
-const premioSpan = document.getElementById("premioActual");
-const saludo = document.getElementById("saludo");
-const mensajeFinal = document.getElementById("mensajeFinal");
+const inicioDiv = document.getElementById("inicio");
+const juegoDiv = document.getElementById("juego");
+const resultadoDiv = document.getElementById("resultado");
+const historialContainer = document.getElementById("historialContainer");
+
+function guardarEstado() {
+  const estado = {
+    nombreJugador,
+    indice,
+    premioActual,
+    estadoJuego
+  };
+  localStorage.setItem("estadoJuego", JSON.stringify(estado));
+}
+
+function cargarEstado() {
+  const estado = JSON.parse(localStorage.getItem("estadoJuego"));
+  if (estado) {
+    nombreJugador = estado.nombreJugador;
+    indice = estado.indice;
+    premioActual = estado.premioActual;
+    estadoJuego = estado.estadoJuego;
+    return true;
+  }
+  return false;
+}
+
+function guardarHistorial(jugador) {
+  const historial = JSON.parse(localStorage.getItem("historial")) || [];
+  historial.push(jugador);
+  localStorage.setItem("historial", JSON.stringify(historial));
+  mostrarHistorial();
+}
+
+function mostrarHistorial() {
+  const historial = JSON.parse(localStorage.getItem("historial")) || [];
+  historialContainer.innerHTML = "<h3>Historial de jugadores</h3>";
+  historial.forEach((j, index) => {
+    historialContainer.innerHTML += `
+      <div class="historial-item">
+        ${j.nombre} - $${j.premio} (${j.estado})
+        <button class="historial-btn" onclick="editarNombre(${index})">Editar</button>
+        <button class="historial-btn" onclick="borrarJugador(${index})">Borrar</button>
+      </div>
+    `;
+  });
+  if (historial.length > 0) {
+    historialContainer.innerHTML += '<button onclick="vaciarHistorial()">Vaciar historial</button>';
+  }
+}
+
+function editarNombre(index) {
+  const historial = JSON.parse(localStorage.getItem("historial")) || [];
+  Swal.fire({
+    title: 'Editar nombre',
+    input: 'text',
+    inputValue: historial[index].nombre,
+    showCancelButton: true
+  }).then((result) => {
+    if (result.isConfirmed) {
+      historial[index].nombre = result.value;
+      localStorage.setItem("historial", JSON.stringify(historial));
+      mostrarHistorial();
+    }
+  });
+}
+
+function borrarJugador(index) {
+  const historial = JSON.parse(localStorage.getItem("historial")) || [];
+  historial.splice(index, 1);
+  localStorage.setItem("historial", JSON.stringify(historial));
+  mostrarHistorial();
+}
+
+function vaciarHistorial() {
+  localStorage.removeItem("historial");
+  mostrarHistorial();
+}
+
+function mostrarInicio() {
+  inicioDiv.innerHTML = `
+    <h1>Quien quiere ser millonario?</h1>
+    <p>Ingresa tu nombre para comenzar:</p>
+    <input type="text" id="nombreJugador" placeholder="Tu nombre" value="${localStorage.getItem("nombre") || ""}">
+    <button id="comenzar">Comenzar juego</button>
+  `;
+  document.getElementById("comenzar").addEventListener("click", iniciarJuego);
+}
 
 function mostrarPregunta() {
   const p = preguntas[indice];
-  preguntaTexto.textContent = p.pregunta;
-  opcionesContainer.innerHTML = "";
-  p.opciones.forEach((opcion, i) => {
-    const btn = document.createElement("button");
-    btn.textContent = opcion;
-    btn.addEventListener("click", () => verificarRespuesta(i));
-    opcionesContainer.appendChild(btn);
-  });
+  juegoDiv.innerHTML = `
+    <h2>Hola ${nombreJugador}</h2>
+    <p>${p.pregunta}</p>
+    <div id="opciones">
+      ${p.opciones.map((op, i) => `<button onclick="verificarRespuesta(${i})">${op}</button>`).join("")}
+    </div>
+    <p>Premio actual: $${premioActual}</p>
+    <button onclick="retirarse()">Retirarse</button>
+  `;
 }
 
 function verificarRespuesta(seleccion) {
   const correcta = preguntas[indice].respuestaCorrecta;
   if (seleccion === correcta) {
     premioActual = preguntas[indice].premio;
-    premioSpan.textContent = premioActual;
     indice++;
+    guardarEstado();
     if (indice < preguntas.length) {
       mostrarPregunta();
     } else {
@@ -57,40 +122,75 @@ function verificarRespuesta(seleccion) {
   }
 }
 
-function finalizarJuego(ganoTodo) {
-  juego.style.display = "none";
-  resultado.style.display = "block";
-  const mensaje = ganoTodo
-    ? `Felicidades ${nombreJugador}! Has ganado $${premioActual}`
-    : `Lo sentimos ${nombreJugador}, respuesta incorrecta. Te vas con $0.`;
-  mensajeFinal.textContent = mensaje;
-  localStorage.setItem("nombre", nombreJugador);
-  localStorage.setItem("premio", ganoTodo ? premioActual : 0);
+function retirarse() {
+  finalizarJuego("retirado");
+}
+
+function finalizarJuego(estadoFinal) {
+  juegoDiv.style.display = "none";
+  resultadoDiv.style.display = "block";
+
+  let mensaje = "";
+  let estado = "";
+
+  if (estadoFinal === true) {
+    mensaje = `${nombreJugador}, ganaste el juego con $ ${premioActual}`;
+    estado = "ganador";
+  } else if (estadoFinal === false) {
+    mensaje = `${nombreJugador}, perdiste. Te llevas $0`;
+    premioActual = 0;
+    estado = "perdio";
+  } else {
+    mensaje = `${nombreJugador}, te retiraste con $ ${premioActual}`;
+    estado = "retirado";
+  }
+
+  resultadoDiv.innerHTML = `
+    <h2>Juego terminado</h2>
+    <p>${mensaje}</p>
+    <button onclick="reiniciar()">Volver a jugar</button>
+  `;
+
+  guardarHistorial({ nombre: nombreJugador, premio: premioActual, estado });
+  localStorage.removeItem("estadoJuego");
+  mostrarHistorial();
+}
+
+function reiniciar() {
+  location.reload();
 }
 
 function iniciarJuego() {
-  nombreJugador = document.getElementById("nombreJugador").value;
-  if (nombreJugador.trim() === "") return;
-  inicio.style.display = "none";
-  juego.style.display = "block";
-  saludo.textContent = `Hola ${nombreJugador}, comenzamos.`;
+  nombreJugador = document.getElementById("nombreJugador").value.trim();
+  if (!nombreJugador) return;
+
+  localStorage.setItem("nombre", nombreJugador);
+  inicioDiv.style.display = "none";
+  juegoDiv.style.display = "block";
+  resultadoDiv.style.display = "none";
+
   indice = 0;
   premioActual = 0;
-  premioSpan.textContent = premioActual;
+  estadoJuego = "enJuego";
+
+  guardarEstado();
   mostrarPregunta();
 }
 
-document.getElementById("comenzar").addEventListener("click", iniciarJuego);
-
-document.getElementById("retirarse").addEventListener("click", () => {
-  juego.style.display = "none";
-  resultado.style.display = "block";
-  mensajeFinal.textContent = `${nombreJugador}, te has retirado con $${premioActual}.`;
-  localStorage.setItem("nombre", nombreJugador);
-  localStorage.setItem("premio", premioActual);
-});
-
-document.getElementById("reiniciar").addEventListener("click", () => {
-  resultado.style.display = "none";
-  inicio.style.display = "block";
-});
+fetch("../js/preguntas.json")
+  .then(res => res.json())
+  .then(data => {
+    preguntas = data;
+    if (cargarEstado()) {
+      if (estadoJuego === "enJuego") {
+        inicioDiv.style.display = "none";
+        juegoDiv.style.display = "block";
+        mostrarPregunta();
+      } else {
+        mostrarInicio();
+      }
+    } else {
+      mostrarInicio();
+    }
+    mostrarHistorial();
+  });

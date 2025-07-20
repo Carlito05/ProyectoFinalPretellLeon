@@ -4,33 +4,30 @@ body {
   padding: 20px;
   text-align: center;
 }
-
 input, button {
   padding: 8px 12px;
   margin: 10px;
   font-size: 16px;
 }
-
 #preguntaContainer {
   margin: 20px auto;
   max-width: 600px;
 }
-
 #opciones button {
   display: block;
   width: 100%;
   margin: 5px 0;
 }
-
-.pantalla {
-  margin-top: 40px;
-}
-
 h1, h2 {
   color: #1b1b1b;
 }
-
 button:hover {
   background-color: #e6e1e1;
   cursor: pointer;
+}
+.historial-item {
+  margin: 5px 0;
+}
+.historial-btn {
+  margin-left: 10px;
 }

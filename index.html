@@ -2,33 +2,15 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Quiz Millonario</title>
+  <title>Quien quiere ser millonario?</title>
   <link rel="stylesheet" href="./css/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
-  <div id="inicio">
-    <h1>Quien quiere ser millonario?</h1>
-    <p>Ingresa tu nombre para comenzar:</p>
-    <input type="text" id="nombreJugador" placeholder="Tu nombre">
-    <button id="comenzar">Comenzar juego</button>
-  </div>
-
-  <div id="juego" style="display: none;">
-    <h2 id="saludo"></h2>
-    <div id="preguntaContainer">
-      <p id="preguntaTexto"></p>
-      <div id="opciones"></div>
-    </div>
-    <p>Premio actual: $<span id="premioActual">0</span></p>
-    <button id="retirarse">Retirarse</button>
-  </div>
-
-  <div id="resultado" style="display: none;">
-    <h2>Juego terminado</h2>
-    <p id="mensajeFinal"></p>
-    <button id="reiniciar">Volver a jugar</button>
-  </div>
-
+  <div id="inicio"></div>
+  <div id="juego" style="display: none;"></div>
+  <div id="resultado" style="display: none;"></div>
+  <div id="historialContainer"></div>
   <script src="./js/script.js"></script>
 </body>
 </html>
